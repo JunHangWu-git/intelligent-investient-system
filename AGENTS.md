@@ -23,6 +23,34 @@ Phase 0-2 + Phase 3 前半（生成信号文件）由 Claude Code 负责写代�
 Phase 3 后半（简报整理/推送提醒）和 Phase 4 由云端 Cowork agent 负责，通过共享文件交接
 （Claude Code 写 `signals.md` / `daily_report.md` 到 repo 里，Cowork 读，不直接对接）。
 
+2026-09-19：整理了 `holdle-knowledge/` 知识库（HOLDLE 方法论7章笔记，通过 `mcp__holdle-ai`
+的 `holdle_ask`/`holdle_get_rules` 检索转述，非课程原文）。同一天内又做了两轮二次加工：
+1) `decomposition/`（A-H共8个模块文件，按"原始观点/核心原则/判断流程/决策规则/常见错误"
+五栏拆解）；2) `investment-system/`（整合成六件套完整投资体系：投资哲学/投资理念/状态A与
+买入时机判断体系/企业分析体系/交易管理规则/入场决策流程图，面向"任何AI读到都能一步步
+判断"）。**Phase 2 做 MACD/state-A 信号逻辑时，直接读 `investment-system/` 六件套**
+（尤其 `03-state-a-entry-timing-system.md`、`06-entry-decision-flowchart.md`），不用再
+翻 `notes/`/`rag/`——那两个是更早期的中间产物，内容已经吸收进 decomposition/ 和
+investment-system/。
+
+额度用量：14次里累计用掉12次（首轮学7章7次+二次查询补缺口2次+"先自己答再对比
+holdle_ask"实战校对3次），**剩2次**，非必要不再调用。二次查询补到的关键缺口：绿柱日精确
+机械定义（原笔记只写"MACD绿柱确认回撤"太糊）、复权口径规则（forward/backward，原笔记
+完全没有，写代码前必须搞对否则算出的价格和行情软件对不上）、方式b首红案例完整时间线。
+**"23条规则清单"已确认不存在**——现行规则包是 §3.1-3.11 编号结构，之前笔记里的
+"待补充"是找错了方向，不用再为这份清单去查。仍未覆盖：第5章更多案例图解、第7章原生
+内容（第7章本身也没有独立文档，是散落进阶文章）。
+
+实战校对进度（`training-log/`，流程=自己按规则算→抽查+`holdle_ask`校对→错的记
+`纠正记录_第N条_<股票名>.md`→重做）：
+1. 携程网TCOM 企业质量 → 判"不过关"，纠错3条（ROE用错算法/漏现金占比联动否决/
+   混淆定性检查表与定量评分算法八项），已记`纠正记录_第1条_携程网TCOM.md`。
+2. 贵州茅台 买入时机(状态A/开窗) → 判"不满足"，对照holdle_ask规则原文无误，
+   没生成纠正记录（验证通过的不记录，只记真错的，避免污染错误库信噪比）。
+   月/周/日K数据源：Tencent公开行情API（`web.ifzq.gtimg.cn`，前复权QFQ），
+   本地Python算MACD(12,26,9)，未用`holdle_data.py`（依赖baostock/tickflow/akshare
+   都没装，装前得先问——见下方"代码风格约定"）。
+
 ## 现有文件
 
 - `holdle_data.py` — 第三方"HOLDLE"分发的行情抓取脚本（非本项目自研代码）。
@@ -42,6 +70,8 @@ Phase 3 后半（简报整理/推送提醒）和 Phase 4 由云端 Cowork agent 
   Ubuntu Linux 版，装在 WSL 本地。**不进 git**（522MB 二进制 + `AppData.dat` 登录会话数据）。
   CLI 版跑在 `127.0.0.1:11111`，Claude Code(WSL) 通过 mirrored 网络模式直连
   （WSL2 mirrored 模式下 `127.0.0.1` 与 Windows 主机共享，不用换 host IP）。
+- `holdle-knowledge/` — HOLDLE 方法论学习笔记（转述整理，非课程原文），`notes/` 按
+  1-7章分文件，`rag/` 是按概念切块+frontmatter的检索友好版。详见该目录下 README.md。
 
 ### Phase 0 已知限制
 
