@@ -6,7 +6,7 @@
 
 ```
 Phase 0  基础设施        git repo + moomoo OpenD/MCP 连接      [完成]
-Phase 1  数据层          定时抓行情，存本地文件/sqlite         [下一步，未开始]
+Phase 1  数据层          定时抓行情，存本地文件/sqlite         [完成]
 Phase 2  策略层          MACD/state-A 信号逻辑 + 历史回测       [未开始]
 Phase 3  执行/提醒层      生成 signals.md 交给 Cowork agent      [Claude Code 负责]
 Phase 4  监控/复盘        Cowork 负责                           [不归 Claude Code 管]
@@ -19,9 +19,27 @@ Phase 0 已完成并验证：moomoo MCP 连接可用，`get_stock_quote`/`get_hi
 跑 `scripts/start_opend.sh`（前提是之前交互登录过一次并选了"记住密码"，否则得先
 交互登录一次）。
 
-Phase 0-2 + Phase 3 前半（生成信号文件）由 Claude Code 负责写代码/跑代码/回测。
+Phase 0-2 + Phase 3 前半（生成信号文件）由 Claude Code 负责，可用单 agent 或多 agent
+（team/并行 executor）协作写代码/跑代码/回测，不限定单人单线程完成。
 Phase 3 后半（简报整理/推送提醒）和 Phase 4 由云端 Cowork agent 负责，通过共享文件交接
 （Claude Code 写 `signals.md` / `daily_report.md` 到 repo 里，Cowork 读，不直接对接）。
+**定时调度必须在本机跑，不能交给 Cowork**——Cowork 是云端 agent，连不到本机
+`127.0.0.1:11111` 的 OpenD，Cowork 只能读 Claude Code 产出的文件。
+
+2026-09-19：Phase 1 完成，**下次接着做 Phase 2**（MACD/state-A 信号逻辑 + 历史回测，
+直接读 `investment-system/` 六件套，见下方相关记录）。数据源是 Phase 1 落的
+`data/quotes.db`（sqlite，`quotes`/`klines` 两张表，klines 主键含 `code`/`ktype`/
+`autype`/`time_key`）。watchlist 暂定 `US.NVDA`/`US.AMD`/`US.STZ`/`US.QQQ`
+（BTC 跳过——moomoo 只读接口无 crypto 现货代码格式，试过 `BTC.BTCUSD`/`US.BTCUSD`
+都不认，后续要接的话得找别的数据源，如公开 crypto API 或改用 IBIT 等 ETF 代理）。
+抓取脚本直连 OpenD（不走 Claude MCP，本机 cron 独立跑），装了 `moomoo-api`
+（pip 包名，import 名是 `moomoo`）到项目 `.venv/`，MCP 用的是同一个包，不算引入新依赖。
+踩坑记录：1) `get_stock_quote` 前必须先 `ctx.subscribe(codes, [SubType.QUOTE])`——
+Claude MCP 工具会自动订阅，原生 SDK 不会；2) K线接口叫 `request_history_kline`
+不是 `get_history_kline`，返回值是三元组 `(ret, df, page_req_key)`；
+3) `AuType.QFQ` 的实际字符串值是小写 `'qfq'`，传大写字符串大概率不认。
+code review（opus, high）过了一轮修了5条（详见 git log），另建了 `cowork_sync.md`
+给 Cowork 每日同步状态用，见下方"与 Cowork 的交接"。
 
 2026-09-19：整理了 `holdle-knowledge/` 知识库（HOLDLE 方法论7章笔记，通过 `mcp__holdle-ai`
 的 `holdle_ask`/`holdle_get_rules` 检索转述，非课程原文）。同一天内又做了两轮二次加工：
@@ -86,7 +104,7 @@ holdle_ask"实战校对3次），**剩2次**，非必要不再调用。二次查
 ## 代码风格约定
 
 - 依赖越少越好，优先标准库；引入第三方包前先问。
-- 代码直白简单，不用高级抽象/设计模式，本科生水平即可，图易改易读。
+- 代码直白简单，不用高级抽象/设计模式，图易改易读。
 - 不确定的地方先问用户，不擅自假设。
 - 不做自动下单。所有信号走人工确认。
 
@@ -95,3 +113,6 @@ holdle_ask"实战校对3次），**剩2次**，非必要不再调用。二次查
 - 交接方式：共享文件，不直接对接。
 - Claude Code 产出：`signals.md`（信号判断结果）、`daily_report.md`（简报素材）。
 - 参数（MACD 周期等）写死在 config 文件里，不做成动态可调。
+- `cowork_sync.md` — 状态同步文件（非信号文件）。Cowork 自己起了个 cron 每天读一次，
+  了解 Claude Code 这边进度/依赖/阻塞。**每次阶段性进展后（尤其 Phase 切换、
+  遇到需要 Cowork 知道的限制或风险时）都要更新这份文件**，不更新 Cowork 就看不到最新状态。

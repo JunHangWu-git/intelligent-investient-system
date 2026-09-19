@@ -25,3 +25,6 @@ data/
 # moomoo OpenD 安装包（第三方二进制 + 登录会话数据 AppData.dat，不进 git）
 moomoo_OpenD_*/
 opend.log
+
+# Phase 1 定时抓取日志
+logs/
