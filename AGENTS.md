@@ -6,11 +6,18 @@
 
 ```
 Phase 0  基础设施        git repo + moomoo OpenD/MCP 连接      [完成]
-Phase 1  数据层          定时抓行情，存本地文件/sqlite         [未开始]
+Phase 1  数据层          定时抓行情，存本地文件/sqlite         [下一步，未开始]
 Phase 2  策略层          MACD/state-A 信号逻辑 + 历史回测       [未开始]
 Phase 3  执行/提醒层      生成 signals.md 交给 Cowork agent      [Claude Code 负责]
 Phase 4  监控/复盘        Cowork 负责                           [不归 Claude Code 管]
 ```
+
+## 现状（下次接着做）
+
+Phase 0 已完成并验证：moomoo MCP 连接可用，`get_stock_quote`/`get_historical_klines`
+读到真实数据。开始 Phase 1 前先确认 OpenD 在跑：`ss -tln | grep 11111`，没起的话
+跑 `scripts/start_opend.sh`（前提是之前交互登录过一次并选了"记住密码"，否则得先
+交互登录一次）。
 
 Phase 0-2 + Phase 3 前半（生成信号文件）由 Claude Code 负责写代码/跑代码/回测。
 Phase 3 后半（简报整理/推送提醒）和 Phase 4 由云端 Cowork agent 负责，通过共享文件交接
