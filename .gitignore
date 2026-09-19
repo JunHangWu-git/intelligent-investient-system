@@ -1,0 +1,23 @@
+# secrets
+holdle-ai-mcp-config.json
+claude_desktop_config.json
+*.key
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# data output (local sqlite/CSV, not committed)
+holdle_data/
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# misc
+.DS_Store
+*.bak
+.version_check_stamp
+.omc/
