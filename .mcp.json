@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "moomoo": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--with",
+        "mcp<2",
+        "moomoo-api-mcp"
+      ],
+      "env": {}
+    }
+  }
+}
